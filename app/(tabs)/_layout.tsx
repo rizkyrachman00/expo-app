@@ -36,14 +36,14 @@ const TabsLayout = () => {
           alignItems: "center",
         },
         tabBarStyle: {
-          backgroundColor: "#000000",
+          backgroundColor: "#ffffff",
           borderRadius: 26,
           marginHorizontal: 20,
           marginBottom: 36,
           height: 52,
           position: "absolute",
           borderWidth: 1,
-          borderColor: "#000000"
+          borderColor: "#ffffff"
         }
       }}
     >
