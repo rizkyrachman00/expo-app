@@ -5,9 +5,13 @@ import {
   View,
   TouchableOpacity,
   GestureResponderEvent,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import MapSelectorModal from "@/components/map.selector.modal";
 
 interface IconCircleProps {
   icon: React.ReactNode;
@@ -25,6 +29,9 @@ const IconCircle = ({ icon, onPress }: IconCircleProps) => (
 );
 
 export default function Index() {
+  const router = useRouter();
+  const [isMapModalVisible, setMapModalVisible] = useState(false);
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <Image source={images.background} className="absolute w-full z-0" />
@@ -60,8 +67,11 @@ export default function Index() {
         Join <Text className="text-accent text-2xl font-rubik-bold">Yuk!!</Text>
       </Text>
 
-      <TouchableOpacity className="items-center mt-12">
-        <View className="rounded-lg overflow-hidden mx-auto w-80 h-36">
+      <TouchableOpacity
+        className="items-center mt-12"
+        onPress={() => router.push("/personal-trainer")}
+      >
+        <View className="rounded-lg overflow-hidden mx-auto w-96 h-40">
           <Image
             source={images.ptImage}
             className="w-full h-full"
@@ -70,8 +80,11 @@ export default function Index() {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity className="items-center mt-5">
-        <View className="rounded-lg overflow-hidden mx-auto w-80 h-36">
+      <TouchableOpacity
+        className="items-center mt-5"
+        onPress={() => router.push("/gym-partner")}
+      >
+        <View className="rounded-lg overflow-hidden mx-auto w-96 h-40">
           <Image
             source={images.temanGym}
             className="w-full h-full"
@@ -84,21 +97,31 @@ export default function Index() {
           icon={
             <FontAwesome5 name="map-marked-alt" size={24} color="#4F46E5" />
           }
-          onPress={() => console.log("Open Maps")}
+          onPress={() => setMapModalVisible(true)}
         />
         <IconCircle
           icon={<FontAwesome5 name="instagram" size={24} color="#E1306C" />}
-          onPress={() => console.log("Open Instagram")}
+          onPress={() =>
+            Linking.openURL("https://www.instagram.com/blackbox.camp")
+          }
         />
         <IconCircle
           icon={<FontAwesome5 name="tiktok" size={24} color="white" />}
-          onPress={() => console.log("Open TikTok")}
+          onPress={() =>
+            Linking.openURL("https://www.tiktok.com/@blackbox.camp")
+          }
         />
         <IconCircle
           icon={<FontAwesome5 name="whatsapp" size={24} color="#25D366" />}
-          onPress={() => console.log("Open WhatsApp")}
+          onPress={() =>
+            Linking.openURL("https://api.whatsapp.com/send?phone=6282325003773")
+          }
         />
       </View>
+      <MapSelectorModal
+        visible={isMapModalVisible}
+        onClose={() => setMapModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
