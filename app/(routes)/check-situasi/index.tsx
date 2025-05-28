@@ -1,8 +1,8 @@
 import CheckSituasiScreen from '@/screens/check-situasi/check.situasi.screen'
 import React from 'react'
 
-const CheckSituasi = () => {
+const index = () => {
   return <CheckSituasiScreen />
 }
 
-export default CheckSituasi
+export default index
