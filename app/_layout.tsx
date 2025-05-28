@@ -5,6 +5,9 @@ import { useEffect } from "react";
 import { useFonts } from "expo-font";
 import "./global.css";
 
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/tanstack.query";
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     "Rubik-Bold": require("../assets/fonts/Rubik-Bold.ttf"),
@@ -26,9 +29,11 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="(routes)/personal-trainer" />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(routes)/personal-trainer" />
+      </Stack>
+    </QueryClientProvider>
   );
 }
