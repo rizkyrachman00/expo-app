@@ -1,60 +1,33 @@
-import { icons } from "@/constants/icons";
-import { images } from "@/constants/images";
-import BottomSheet from "@gorhom/bottom-sheet";
+import React, { useRef, useState } from "react";
+import { Pressable } from "react-native";
 import { Tabs } from "expo-router";
-import React, { createContext, useContext, useRef, useState } from "react";
-import { Image, ImageBackground, Pressable, Text, View } from "react-native";
+import BottomSheet from "@gorhom/bottom-sheet";
 
-const TabIcon = ({ focused, icon, title }: any) => {
-  if (focused) {
-    return (
-      <ImageBackground
-        source={images.highlight}
-        className="flex flex-row w-full flex-1 min-w-[110px] min-h-[60px] mt-4 justify-center items-center rounded-full overflow-hidden"
-      >
-        <Image source={icon} className="size-5" tintColor="#151312" />
-        <Text className="text-secondary text-base font-semibold ml-2">
-          {title}
-        </Text>
-      </ImageBackground>
-    );
-  }
+import TabIcon from "@/components/tab.icon";
+import DrawerContent from "@/components/drawer/drawer.content";
+import BottomSheetContext from "@/context/BottomSheetContext";
 
-  return (
-    <View className="size-full justify-center items-center mt-4 rounded-full">
-      <Image source={icon} tintColor="#FCA311" className="size-5" />
-    </View>
-  );
-};
-
-const BottomSheetContext = createContext({
-  openDrawer: () => {},
-  closeDrawer: () => {},
-});
-
-export function useBottomSheetDrawer() {
-  return useContext(BottomSheetContext);
-}
+import { icons } from "@/constants/icons";
 
 const TabsLayout = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenDrawer, setIsOpenDrawer] = useState(false);
   const [isMoreFocused, setIsMoreFocused] = useState(false);
 
   const openDrawer = () => {
     bottomSheetRef.current?.snapToIndex(0);
-    setIsOpen(true);
+    setIsOpenDrawer(true);
     setIsMoreFocused(true);
   };
 
   const closeDrawer = () => {
     bottomSheetRef.current?.close();
-    setIsOpen(false);
+    setIsOpenDrawer(false);
     setIsMoreFocused(false);
   };
 
   const toggleDrawer = () => {
-    isOpen ? closeDrawer() : openDrawer();
+    isOpenDrawer ? closeDrawer() : openDrawer();
   };
 
   return (
@@ -141,23 +114,17 @@ const TabsLayout = () => {
         onChange={(index) => {
           if (index === -1) {
             setIsMoreFocused(false);
+            setIsOpenDrawer(false);
           } else {
             setIsMoreFocused(true);
+            setIsOpenDrawer(true);
           }
         }}
       >
-        <YourDrawerContent />
+        <DrawerContent />
       </BottomSheet>
     </BottomSheetContext.Provider>
   );
 };
-
-function YourDrawerContent() {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Isi Bottom Sheet (Drawer Custom)</Text>
-    </View>
-  );
-}
 
 export default TabsLayout;
