@@ -1,31 +1,11 @@
-import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import React from "react";
-import { Text, View, ActivityIndicator } from "react-native";
+// app/(tabs)/check-in.tsx
+import ProtectedScreen from "@/components/auth/ProtectedScreen";
+import CheckInScreen from "@/screens/check-in/check.in.screen";
 
-const CheckIn = () => {
-  const { isAuthenticated, isLoaded } = useProtectedRoute();
-
-  if (!isLoaded) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <View className="flex-1 justify-center items-center bg-black">
-        <Text className="text-white text-base">Restricted Area. Please login.</Text>
-      </View>
-    );
-  }
-
+export default function CheckIn() {
   return (
-    <View className="flex-1 justify-center items-center">
-      <Text className="text-base">CheckIn</Text>
-    </View>
+    <ProtectedScreen>
+      <CheckInScreen />
+    </ProtectedScreen>
   );
-};
-
-export default CheckIn;
+}
