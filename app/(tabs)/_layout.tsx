@@ -1,10 +1,10 @@
+import BottomSheet from "@gorhom/bottom-sheet";
+import { Tabs } from "expo-router";
 import React, { useRef, useState } from "react";
 import { Pressable } from "react-native";
-import { Tabs } from "expo-router";
-import BottomSheet from "@gorhom/bottom-sheet";
 
-import TabIcon from "@/components/tab.icon";
 import DrawerContent from "@/components/drawer/drawer.content";
+import TabIcon from "@/components/tab.icon";
 import BottomSheetContext from "@/context/BottomSheetContext";
 
 import { icons } from "@/constants/icons";
@@ -107,7 +107,7 @@ const TabsLayout = () => {
 
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={["50%"]}
+        snapPoints={["50%", "70%"]}
         index={-1}
         enableDynamicSizing={false}
         enablePanDownToClose={true}

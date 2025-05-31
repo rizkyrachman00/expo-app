@@ -4,6 +4,7 @@ import * as AuthSession from "expo-auth-session";
 import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import { LoggedInView } from "@/components/auth/LoggedInView";
 import { LoggedOutView } from "@/components/auth/LoggedOutView";
+import { ScrollView, View } from "react-native";
 
 const DrawerContent = () => {
   const { user } = useUser();
@@ -27,11 +28,19 @@ const DrawerContent = () => {
     }
   }, [startSSOFlow]);
 
-  if (!user) {
-    return <LoggedOutView onLogin={onLoginGoogle} />;
-  }
-
-  return <LoggedInView user={user} onLogout={signOut} />;
+  return (
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
+      className="bg-black px-6 pt-12 pb-10"
+    >
+      {!user ? (
+        <LoggedOutView onLogin={onLoginGoogle} />
+      ) : (
+        <LoggedInView user={user} onLogout={signOut} />
+      )}
+    </ScrollView>
+  );
 };
 
 export default DrawerContent;

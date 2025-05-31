@@ -3,7 +3,7 @@ import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 
 export const LoggedOutView = ({ onLogin }: { onLogin: () => void }) => (
-  <View className="flex-1 px-6 py-10 items-center justify-center bg-primary relative">
+  <View className="items-center justify-center relative">
     <Image
       source={images.loginIllustration}
       resizeMode="contain"
