@@ -1,22 +1,25 @@
+import { useBottomSheetDrawer } from "@/context/BottomSheetContext";
 import { useUser } from "@clerk/clerk-expo";
 import { useEffect, useState } from "react";
-import { useBottomSheetDrawer } from "@/context/BottomSheetContext";
 
 export const useProtectedRoute = () => {
   const { user, isLoaded } = useUser();
-  const { openDrawer } = useBottomSheetDrawer();
+  const { openDrawer, closeDrawer } = useBottomSheetDrawer();
   const [hasOpenedDrawer, setHasOpenedDrawer] = useState(false);
 
   useEffect(() => {
-    if (isLoaded && !user && !hasOpenedDrawer) {
+    if (!isLoaded) return;
+
+    if (!user && !hasOpenedDrawer) {
       openDrawer();
       setHasOpenedDrawer(true);
     }
-    
-    if (user) {
+
+    if (user && hasOpenedDrawer) {
+      closeDrawer();
       setHasOpenedDrawer(false);
     }
-  }, [user, isLoaded, hasOpenedDrawer, openDrawer]);
+  }, [user, isLoaded, hasOpenedDrawer, openDrawer, closeDrawer]);
 
   return { isAuthenticated: !!user, isLoaded };
 };
