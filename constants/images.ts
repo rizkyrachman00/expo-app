@@ -4,6 +4,7 @@ import logo from "@/assets/images/icon.png";
 import ptImage from "@/assets/images/personal-trainer.png";
 import temanGym from "@/assets/images/teman-gym.png";
 import loginIllustration from "@/assets/images/login-illustration.png";
+import restricted from "@/assets/images/restricted.png";
 
 export const images = {
   highlight,
@@ -11,5 +12,6 @@ export const images = {
   background,
   ptImage,
   temanGym,
-  loginIllustration
+  loginIllustration,
+  restricted,
 };
