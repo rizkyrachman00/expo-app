@@ -1,15 +1,32 @@
+import { images } from "@/constants/images";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Image, ImageBackground, Text, View } from "react-native";
-import { images } from "@/constants/images";
 
 interface TabIconProps {
   focused: boolean;
   icon: any;
-  title: string;
+  title?: string;
 }
 
 const TabIcon = ({ focused, icon, title }: TabIconProps) => {
   if (focused) {
+    if (!title) {
+      return (
+        <View className="mt-4 items-center justify-center">
+          <LinearGradient
+            colors={["#38bdf8", "#e879f9"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            className="w-10 h-10 justify-center items-center"
+            style={{ borderRadius: 20 }}
+          >
+            <Image source={icon} className="w-5 h-5" tintColor="white" />
+          </LinearGradient>
+        </View>
+      );
+    }
+
     return (
       <ImageBackground
         source={images.highlight}
