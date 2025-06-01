@@ -1,9 +1,35 @@
 import { UserResource } from "@clerk/types";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 
 import { isAdmin } from "@/utils/roleCheck";
+
+const MenuItem = ({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onPress: () => void;
+}) => (
+  <View className="w-[48%] rounded-2xl overflow-hidden shadow-md shadow-black/30 border border-white/10">
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: "#FCA311", borderless: false }}
+      className="flex-row items-center bg-neutral-900 px-5 py-4"
+    >
+      {icon}
+      <Text
+        className="text-white text-base ml-3 font-rubik-medium"
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  </View>
+);
 
 export const LoggedInView = ({
   user,
@@ -45,42 +71,41 @@ export const LoggedInView = ({
 
       <View className="mt-12">
         <View className="flex-row flex-wrap gap-x-4 gap-y-4">
-          <View className="w-[48%] rounded-2xl overflow-hidden shadow-md shadow-black/30 border border-white/10">
-            <Pressable
-              onPress={() => router.push("/(routes)/personal-trainer")}
-              android_ripple={{ color: "#FCA311", borderless: false }}
-              className="flex-row items-center bg-neutral-900 px-5 py-4"
-            >
-              <Ionicons name="barbell-outline" size={20} color="#FCA311" />
-              <Text
-                className="text-white text-base ml-3 font-rubik-medium"
-                numberOfLines={1}
-              >
-                Trainer
-              </Text>
-            </Pressable>
-          </View>
+          <MenuItem
+            label="Trainer"
+            icon={<Ionicons name="barbell-outline" size={20} color="#FCA311" />}
+            onPress={() => router.push("/(routes)/personal-trainer")}
+          />
 
           {admin && (
-            <View className="w-[48%] rounded-2xl overflow-hidden shadow-md shadow-black/30 border border-white/10">
-              <Pressable
-                onPress={() => console.log("Navigate to Admin Dashboard")}
-                android_ripple={{ color: "#FCA311", borderless: false }}
-                className="flex-row items-center bg-neutral-900 px-5 py-4"
-              >
-                <Ionicons name="settings-outline" size={20} color="#FCA311" />
-                <Text
-                  className="text-white text-base ml-3 font-rubik-medium"
-                  numberOfLines={1}
-                >
-                  Admin
-                </Text>
-              </Pressable>
-            </View>
+            <>
+              <MenuItem
+                label="QR Check-In"
+                icon={
+                  <Ionicons name="qr-code-outline" size={20} color="#FCA311" />
+                }
+                onPress={() => console.log("Navigate to QR Check-In")}
+              />
+              <MenuItem
+                label="Check-In Data"
+                icon={
+                  <FontAwesome6 name="list-check" size={20} color="#FCA311" />
+                }
+                onPress={() => console.log("Navigate to Check-In Data")}
+              />
+              <MenuItem
+                label="Members"
+                icon={<MaterialIcons name="groups" size={20} color="#FCA311" />}
+                onPress={() => console.log("Navigate to Members")}
+              />
+            </>
           )}
+          
         </View>
 
-        <View className="mt-6 rounded-2xl overflow-hidden shadow-md shadow-black/30">
+        <View className="my-6 h-px bg-white/20" />
+
+        <View className="mt-4 rounded-2xl overflow-hidden shadow-md shadow-black/30">
           <Pressable
             onPress={onLogout}
             android_ripple={{ color: "#ff7f7f", borderless: false }}
