@@ -1,10 +1,10 @@
-import React, { useCallback } from "react";
-import { useUser, useAuth, useSSO } from "@clerk/clerk-expo";
-import * as AuthSession from "expo-auth-session";
-import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import { LoggedInView } from "@/components/auth/LoggedInView";
 import { LoggedOutView } from "@/components/auth/LoggedOutView";
-import { ScrollView, View } from "react-native";
+import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
+import { useAuth, useSSO, useUser } from "@clerk/clerk-expo";
+import * as AuthSession from "expo-auth-session";
+import React, { useCallback } from "react";
+import { ScrollView } from "react-native";
 
 const DrawerContent = () => {
   const { user } = useUser();

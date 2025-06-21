@@ -1,18 +1,24 @@
-import React from "react";
-import { View, ActivityIndicator } from "react-native";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { useAuth } from "@clerk/clerk-expo";
+import { isAdmin } from "@/utils/roleCheck";
+import { useAuth, useUser } from "@clerk/clerk-expo";
+import React from "react";
+import { ActivityIndicator, View } from "react-native";
 import RestrictedArea from "./RestrictedArea";
+
+type ProtectedScreenProps = {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+};
 
 export default function ProtectedScreen({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+  requireAdmin = false,
+}: ProtectedScreenProps) {
   const { isAuthenticated, isLoaded: routeLoaded } = useProtectedRoute();
   const { isLoaded: authLoaded } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
 
-  const isReady = routeLoaded && authLoaded;
+  const isReady = routeLoaded && authLoaded && userLoaded;
 
   if (!isReady) {
     return (
@@ -22,8 +28,17 @@ export default function ProtectedScreen({
     );
   }
 
+  // if user is not authenticated
   if (!isAuthenticated) {
-    return <RestrictedArea />;
+    return <RestrictedArea reason="unauthenticated" />;
+  }
+
+  // if user is not an admin
+  if (requireAdmin) {
+    const email = user?.primaryEmailAddress?.emailAddress;
+    if (!isAdmin(email)) {
+      return <RestrictedArea reason="unauthorized" />;
+    }
   }
 
   return <>{children}</>;
