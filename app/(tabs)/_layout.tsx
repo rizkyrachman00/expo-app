@@ -10,8 +10,6 @@ import TabIcon from "@/components/tab.icon";
 import BottomSheetContext from "@/context/BottomSheetContext";
 
 import { icons } from "@/constants/icons";
-import { AntDesign } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 
 const TabsLayout = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -40,10 +38,10 @@ const TabsLayout = () => {
     isOpenDrawer ? closeDrawer() : openDrawer();
   };
 
-  const onPressAdd = () => {
-    // router.push("/admin/add-item"); // contoh route
-    console.log("onPressAdd");
-  };
+  // const onPressAdd = () => {
+  //   // router.push("/admin/add-item"); // contoh route
+  //   console.log("onPressAdd");
+  // };
 
   return (
     <BottomSheetContext.Provider value={{ openDrawer, closeDrawer }}>
@@ -120,7 +118,7 @@ const TabsLayout = () => {
         />
       </Tabs>
 
-      {admin && (
+      {/* {admin && (
         <LinearGradient
           colors={["#38bdf8", "#e879f9"]}
           start={{ x: 0, y: 0.5 }}
@@ -146,7 +144,7 @@ const TabsLayout = () => {
             <AntDesign name="adduser" size={24} color="white" />
           </Pressable>
         </LinearGradient>
-      )}
+      )} */}
 
       <BottomSheet
         ref={bottomSheetRef}
