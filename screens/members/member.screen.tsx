@@ -15,12 +15,14 @@ import Carousel from "react-native-reanimated-carousel";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { carouselImages } from "@/constants/data/carousel.image";
+import { router } from "expo-router";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const MemberScreen = () => {
   const onPressAdd = () => {
     console.log("Add user");
+    router.push("/members/addMember");
   };
 
   const newMembersCount = 3;
@@ -42,7 +44,7 @@ const MemberScreen = () => {
         ListHeaderComponent={
           <>
             {/* Picker Cabang */}
-            <View className="flex-row justify-end">
+            <View className="mt-2 flex-row justify-end">
               <LinearGradient
                 colors={["#c084fc", "#60a5fa"]}
                 start={{ x: 0, y: 0.5 }}
@@ -68,7 +70,7 @@ const MemberScreen = () => {
             </View>
 
             {/* Header Carousel */}
-            <View className="mt-7 relative w-full" style={{ height: 240 }}>
+            <View className="mt-4 relative w-full" style={{ height: 240 }}>
               <View
                 style={{
                   borderRadius: 20,
