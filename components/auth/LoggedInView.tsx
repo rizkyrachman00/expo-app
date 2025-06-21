@@ -74,7 +74,7 @@ export const LoggedInView = ({
           <MenuItem
             label="Trainer"
             icon={<Ionicons name="barbell-outline" size={20} color="#FCA311" />}
-            onPress={() => router.push("/(routes)/personal-trainer")}
+            onPress={() => router.push("/(routes)/(guest)/personal-trainer")}
           />
 
           {admin && (
@@ -96,7 +96,7 @@ export const LoggedInView = ({
               <MenuItem
                 label="Members"
                 icon={<MaterialIcons name="groups" size={20} color="#FCA311" />}
-                onPress={() => console.log("Navigate to Members")}
+                onPress={() => router.push("/(routes)/(admin)/members")}
               />
             </>
           )}
