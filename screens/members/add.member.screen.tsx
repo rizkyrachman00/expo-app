@@ -1,4 +1,10 @@
 import { MemberSchema, type AddMemberForm } from "@/schemas/member.schema";
+import {
+  formatDate,
+  generateMarkedDates,
+  getOneMonthLater,
+  getToday,
+} from "@/utils/dateHelpers";
 import { useAuth } from "@clerk/clerk-expo";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -28,10 +34,14 @@ const AddMemberScreen = () => {
     startDate: string | null;
     endDate: string | null;
     markedDates: Record<string, any>;
-  }>({
-    startDate: null,
-    endDate: null,
-    markedDates: {},
+  }>(() => {
+    const start = formatDate(getToday());
+    const end = formatDate(getOneMonthLater());
+    return {
+      startDate: start,
+      endDate: end,
+      markedDates: generateMarkedDates(start, end),
+    };
   });
 
   const [branches, setBranches] = useState<
@@ -75,34 +85,6 @@ const AddMemberScreen = () => {
   useEffect(() => {
     fetchBranches();
   }, []);
-
-  const generateMarkedDates = (start: string, end: string) => {
-    const dates: Record<string, any> = {};
-
-    let current = new Date(start);
-    const endDate = new Date(end);
-
-    while (current <= endDate) {
-      const dateStr = current.toISOString().split("T")[0];
-      dates[dateStr] = {
-        color: "#60a5fa",
-        textColor: "white",
-      };
-      current.setDate(current.getDate() + 1);
-    }
-
-    dates[start] = {
-      ...dates[start],
-      startingDay: true,
-    };
-
-    dates[end] = {
-      ...dates[end],
-      endingDay: true,
-    };
-
-    return dates;
-  };
 
   const onDayPress = (day: { dateString: string }) => {
     const { dateString } = day;
