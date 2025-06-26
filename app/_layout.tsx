@@ -6,10 +6,10 @@ import { useFonts } from "expo-font";
 import "./global.css";
 
 import { queryClient } from "@/lib/tanstack.query";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import * as WebBrowser from "expo-web-browser";
 WebBrowser.maybeCompleteAuthSession();
@@ -47,7 +47,6 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="(routes)/personal-trainer" />
             </Stack>
           </QueryClientProvider>
         </ClerkLoaded>
