@@ -1,6 +1,7 @@
 import { Branch, MemberWithSubscriptions } from "@/schemas/subscription.schema";
 import { create } from "zustand";
 
+// Zustand state
 interface MemberState {
   members: MemberWithSubscriptions[];
   branches: Branch[];
@@ -11,6 +12,7 @@ interface MemberState {
   setShouldRefetch: (val: boolean) => void;
 }
 
+// Zustand store
 export const useMemberStore = create<MemberState>((set) => ({
   members: [],
   branches: [],
