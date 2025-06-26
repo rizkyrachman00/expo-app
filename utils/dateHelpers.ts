@@ -39,3 +39,15 @@ export const generateMarkedDates = (start: string, end: string) => {
 
   return dates;
 };
+
+// Format indo date
+export const formatIndoDate = (input: string | Date): string => {
+  const date = typeof input === "string" ? new Date(input) : input;
+  if (isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+};
