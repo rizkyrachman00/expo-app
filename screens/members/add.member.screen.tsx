@@ -1,4 +1,5 @@
 import { MemberSchema, type AddMemberForm } from "@/schemas/member.schema";
+import { useMemberStore } from "@/stores/member.store";
 import {
   formatDate,
   generateMarkedDates,
@@ -172,6 +173,8 @@ const AddMemberScreen = () => {
       if (!res.ok) {
         throw new Error(data?.message || "Gagal menambahkan member baru.");
       }
+
+      useMemberStore.getState().setShouldRefetch(true);
 
       Alert.alert("Sukses", "Member berhasil ditambahkan.");
       router.back();

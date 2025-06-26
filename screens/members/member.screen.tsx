@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getBranches } from "@/api/branches";
 import { getSubscriptions } from "@/api/subscriptions";
 import { carouselImages } from "@/constants/data/carousel.image";
-import { Branch, MemberWithSubscriptions } from "@/schemas/subscription.schema";
+import { useMemberStore } from "@/stores/member.store";
 import { getBranchLabel, getGradientColors } from "@/utils/branch.helper";
 import { useAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
@@ -27,39 +27,50 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const MemberScreen = () => {
   const { getToken } = useAuth();
-  const [members, setMembers] = useState<MemberWithSubscriptions[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const {
+    members,
+    setMembers,
+    branches,
+    setBranches,
+    shouldRefetch,
+    setShouldRefetch,
+  } = useMemberStore();
+
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(members.length === 0);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // get members data
+  // fetch members data
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMembers = async () => {
+      setLoading(true);
       try {
         const token = await getToken({ template: "user_email_role" });
         if (!token) throw new Error("Token tidak tersedia");
-
         const data = await getSubscriptions(token);
         setMembers(data);
-      } catch (error) {
-        console.error("Gagal ambil data member:", error);
+      } catch (err) {
+        console.error("Gagal ambil data member:", err);
       } finally {
         setLoading(false);
+        setShouldRefetch(false); // selesai fetch ulang
       }
     };
 
-    fetchData();
-  }, []);
+    if (members.length === 0 || shouldRefetch) {
+      fetchMembers();
+    }
+  }, [shouldRefetch]);
 
-  // get branches
+  // fetch branches
   useEffect(() => {
     const fetchBranches = async () => {
+      if (branches.length > 0) return;
       try {
         const data = await getBranches();
         setBranches(data);
-      } catch (error) {
-        console.error("Gagal ambil data cabang:", error);
+      } catch (err) {
+        console.error("Gagal ambil data cabang:", err);
       }
     };
 
@@ -119,8 +130,19 @@ const MemberScreen = () => {
           keyExtractor={(_, i) => i.toString()}
           ListHeaderComponent={
             <>
-              {/* Picker Cabang Skeleton */}
-              <View className="my-6 flex-row justify-end">
+              <View className="my-6 flex-row justify-between items-center">
+                {/* Skeleton Title */}
+                <View className="ms-5 w-[140px] h-[28px]">
+                  <Skeleton
+                    height={28}
+                    width={140}
+                    colorMode="dark"
+                    radius={6}
+                    style={{ borderRadius: 6 }}
+                  />
+                </View>
+
+                {/* Picker Cabang Skeleton */}
                 <View
                   className="w-1/2"
                   style={{
@@ -210,8 +232,13 @@ const MemberScreen = () => {
           keyExtractor={(item, index) => index.toString()}
           ListHeaderComponent={
             <>
-              {/* Picker Cabang */}
-              <View className="my-6 flex-row justify-end">
+              <View className="my-6 flex-row justify-between items-center">
+                {/* Title Screen */}
+                <Text className="ms-5 text-white font-rubik-bold text-2xl">
+                  Daftar Member
+                </Text>
+
+                {/* Picker Cabang */}
                 <LinearGradient
                   colors={getGradientColors(selectedBranchId)}
                   start={{ x: 0, y: 0.5 }}
@@ -352,7 +379,8 @@ const MemberScreen = () => {
             </>
           }
           renderItem={({ item, index }) => (
-            <View
+            <Pressable
+              onPress={() => router.push(`/members/${item.member.id}`)}
               className={`px-4 py-6 ${
                 index % 2 === 0 ? "bg-white/5" : "bg-white/10"
               }`}
@@ -360,7 +388,7 @@ const MemberScreen = () => {
               <Text className="text-white text-base font-rubik">
                 {item.member.name}
               </Text>
-            </View>
+            </Pressable>
           )}
           ListFooterComponent={<View className="h-10" />}
           ListEmptyComponent={
