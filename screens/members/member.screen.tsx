@@ -120,7 +120,7 @@ const MemberScreen = () => {
           ListHeaderComponent={
             <>
               {/* Picker Cabang Skeleton */}
-              <View className="my-3 flex-row justify-end">
+              <View className="my-6 flex-row justify-end">
                 <View
                   className="w-1/2"
                   style={{
@@ -143,7 +143,7 @@ const MemberScreen = () => {
               </View>
 
               {/* Carousel Skeleton */}
-              <View className="mt-4 w-full" style={{ height: 240 }}>
+              <View className="w-full" style={{ height: 240 }}>
                 <View
                   style={{
                     borderRadius: 10,
@@ -182,7 +182,7 @@ const MemberScreen = () => {
               </View>
 
               {/* Search Box Skeleton */}
-              <View className="mt-14 mb-10 mx-6">
+              <View className="my-10 mx-6">
                 <Skeleton
                   height={55}
                   width="100%"
@@ -211,7 +211,7 @@ const MemberScreen = () => {
           ListHeaderComponent={
             <>
               {/* Picker Cabang */}
-              <View className="my-3 flex-row justify-end">
+              <View className="my-6 flex-row justify-end">
                 <LinearGradient
                   colors={getGradientColors(selectedBranchId)}
                   start={{ x: 0, y: 0.5 }}
@@ -244,7 +244,7 @@ const MemberScreen = () => {
               </View>
 
               {/* Header Carousel */}
-              <View className="mt-4 relative w-full" style={{ height: 240 }}>
+              <View className="relative w-full" style={{ height: 240 }}>
                 <View
                   style={{
                     borderRadius: 10,
@@ -332,7 +332,7 @@ const MemberScreen = () => {
               </View>
 
               {/* Search box */}
-              <View className="mt-14 mb-10 mx-6">
+              <View className="my-10 mx-6">
                 <View className="flex-row items-center bg-white/50 rounded-lg p-2">
                   <AntDesign
                     name="search1"
