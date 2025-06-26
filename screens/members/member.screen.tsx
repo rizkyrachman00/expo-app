@@ -95,9 +95,11 @@ const MemberScreen = () => {
     const query = searchQuery.trim().toLowerCase();
     if (query === "") return filteredMembersByBranch;
 
-    return filteredMembersByBranch.filter((m) =>
-      m.member.name.toLowerCase().includes(query)
-    );
+    return filteredMembersByBranch.filter((m) => {
+      const nameMatch = m.member.name.toLowerCase().includes(query);
+      const phoneMatch = m.member.phone?.toLowerCase().includes(query);
+      return nameMatch || phoneMatch;
+    });
   }, [searchQuery, filteredMembersByBranch]);
 
   // handle add member button
