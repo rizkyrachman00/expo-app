@@ -216,11 +216,28 @@ const MemberScreen = () => {
           }
           renderItem={({ index }) => (
             <View
-              className={`px-4 py-6 ${
+              className={`flex-row items-center gap-4 px-4 py-6 ${
                 index % 2 === 0 ? "bg-white/5" : "bg-white/10"
               }`}
+              style={{
+                borderRadius: 12,
+                marginHorizontal: 4,
+                marginVertical: 4,
+              }}
             >
-              <Skeleton height={20} width="60%" colorMode="dark" radius={6} />
+              {/* Avatar Skeleton */}
+              <Skeleton
+                width={48}
+                height={48}
+                radius="round"
+                colorMode="dark"
+              />
+
+              {/* Text Info Skeleton */}
+              <View className="flex-1 gap-2">
+                <Skeleton height={14} width="50%" colorMode="dark" radius={6} />
+                <Skeleton height={12} width="30%" colorMode="dark" radius={6} />
+              </View>
             </View>
           )}
           ListFooterComponent={<View className="h-10" />}
@@ -381,13 +398,31 @@ const MemberScreen = () => {
           renderItem={({ item, index }) => (
             <Pressable
               onPress={() => router.push(`/members/${item.member.id}`)}
-              className={`px-4 py-6 ${
+              className={`flex-row items-center gap-4 px-4 py-6 ${
                 index % 2 === 0 ? "bg-white/5" : "bg-white/10"
               }`}
+              style={{
+                borderRadius: 12,
+                marginHorizontal: 4,
+                marginVertical: 4,
+              }}
             >
-              <Text className="text-white text-base font-rubik">
-                {item.member.name}
-              </Text>
+              {/* Avatar */}
+              <Image
+                source={{
+                  uri: `https://ui-avatars.com/api/?name=${item.member.name}`,
+                }}
+                className="w-12 h-12 rounded-full bg-white/20"
+              />
+              {/* Info */}
+              <View>
+                <Text className="text-white text-base font-rubik-bold">
+                  {item.member.name}
+                </Text>
+                <Text className="text-white/80 text-sm font-rubik">
+                  {item.member.phone}
+                </Text>
+              </View>
             </Pressable>
           )}
           ListFooterComponent={<View className="h-10" />}
