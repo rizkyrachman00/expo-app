@@ -1,20 +1,57 @@
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
-import React, { useMemo } from "react";
-import { FlatList, Image, ScrollView, Text, View } from "react-native";
+import {
+  AntDesign,
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo } from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { getSubscriptions } from "@/api/subscriptions";
 import { useMemberStore } from "@/stores/member.store";
 import { getBranchLabel } from "@/utils/branch.helper";
 import { formatIndoDate } from "@/utils/dateHelpers";
+import { useAuth } from "@clerk/clerk-expo";
 
 const MemberDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { members } = useMemberStore();
+  const { members, shouldRefetch, setShouldRefetch, setMembers } =
+    useMemberStore();
+  const router = useRouter();
+  const { getToken } = useAuth();
 
   const member = useMemo(() => {
     return members.find((m) => m.member.id === id);
   }, [id, members]);
+
+  // refetch data member jika ada perubahan
+  useEffect(() => {
+    const refetchData = async () => {
+      try {
+        const token = await getToken({ template: "user_email_role" });
+        const updatedMembers = await getSubscriptions(token);
+        setMembers(updatedMembers);
+      } catch (err) {
+        console.error("Gagal refetch data:", err);
+      } finally {
+        setShouldRefetch(false);
+      }
+    };
+
+    if (shouldRefetch) {
+      refetchData();
+    }
+  }, [shouldRefetch]);
 
   if (!member) {
     return (
@@ -40,6 +77,66 @@ const MemberDetailScreen = () => {
           <Text className="mt-4 text-white font-rubik-bold text-xl">
             {name}
           </Text>
+        </View>
+
+        {/* buttons actions Check In, Extend Subscription */}
+        <View className="flex-row justify-center gap-4 mb-7 mx-10">
+          {/* Check In */}
+          <View className="flex-1 overflow-hidden rounded-xl">
+            <Pressable
+              onPress={() => console.log("TODO: Navigate to check in screen")}
+              android_ripple={{ color: "#003f88" }}
+            >
+              {({ pressed }) => (
+                <View
+                  className={`flex-row items-center justify-center gap-2 px-4 py-3 bg-blue-500 ${
+                    pressed ? "opacity-80" : "opacity-100"
+                  }`}
+                >
+                  <Feather name="log-in" size={18} color="white" />
+                  <Text className="text-white font-rubik">Check In</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
+
+          {/* Extend Subscription */}
+          <View className="flex-1 overflow-hidden rounded-xl">
+            <Pressable
+              onPress={() => {
+                const memberId = member.member.id;
+                const cardId = member.subscriptions?.[0]?.membershipCard?.id;
+
+                if (!cardId) {
+                  Alert.alert(
+                    "Data tidak valid",
+                    "Member belum memiliki kartu."
+                  );
+                  return;
+                }
+
+                router.push(
+                  `/members/extendSubscription?id=${memberId}&cardId=${cardId}`
+                );
+              }}
+              android_ripple={{ color: "#0d6833" }}
+            >
+              {({ pressed }) => (
+                <View
+                  className={`flex-row items-center justify-center gap-2 px-4 py-3 bg-green-500 ${
+                    pressed ? "opacity-80" : "opacity-100"
+                  }`}
+                >
+                  <MaterialCommunityIcons
+                    name="calendar-plus"
+                    size={18}
+                    color="white"
+                  />
+                  <Text className="text-white font-rubik">Perpanjang</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
 
         <Text className="text-white font-rubik-bold text-lg mb-2">

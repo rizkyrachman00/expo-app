@@ -1,7 +1,14 @@
-import { MemberSchema, type AddMemberForm } from "@/schemas/member.schema";
+import { getBranches } from "@/api/branches";
+import { createSubscription } from "@/api/subscriptions";
+import { type AddMemberForm } from "@/schemas/member.schema";
+import {
+  AddSubscriptionPayload,
+  AddSubscriptionPayloadSchema,
+} from "@/schemas/subscription.schema";
 import { useMemberStore } from "@/stores/member.store";
 import {
   formatDate,
+  formatIndoDate,
   generateMarkedDates,
   getOneMonthLater,
   getToday,
@@ -22,11 +29,9 @@ import {
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import Modal from "react-native-modal";
-import RNPickerSelect from "react-native-picker-select";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const AddMemberScreen = () => {
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
   const { getToken } = useAuth();
   const router = useRouter();
 
@@ -51,12 +56,12 @@ const AddMemberScreen = () => {
   const [loadingBranches, setLoadingBranches] = useState(true);
 
   const [form, setForm] = useState<
-    Omit<AddMemberForm, "branchIds"> & { branchId: string }
+    Omit<AddMemberForm, "branchIds"> & { branchIds: string[] }
   >({
     name: "",
     phone: "",
     email: "",
-    branchId: "",
+    branchIds: [],
     activeSince: "",
     activeUntil: "",
   });
@@ -70,28 +75,26 @@ const AddMemberScreen = () => {
     setForm({ ...form, [field]: value });
   };
 
-  const fetchBranches = async () => {
-    try {
-      setLoadingBranches(true);
-      const res = await fetch(`${API_BASE_URL}/branches`);
-      const data = await res.json();
-      setBranches(data);
-    } catch {
-      Alert.alert("Error", "Gagal memuat cabang.");
-    } finally {
-      setLoadingBranches(false);
-    }
-  };
-
   useEffect(() => {
-    fetchBranches();
+    const loadBranches = async () => {
+      try {
+        setLoadingBranches(true);
+        const data = await getBranches();
+        setBranches(data);
+      } catch (error) {
+        Alert.alert("Error", "Gagal memuat cabang.");
+      } finally {
+        setLoadingBranches(false);
+      }
+    };
+
+    loadBranches();
   }, []);
 
   const onDayPress = (day: { dateString: string }) => {
     const { dateString } = day;
 
     if (!range.startDate || (range.startDate && range.endDate)) {
-      // Mulai baru
       setRange({
         startDate: dateString,
         endDate: null,
@@ -104,12 +107,10 @@ const AddMemberScreen = () => {
         },
       });
     } else {
-      // Akhiri range
       const start = new Date(range.startDate);
       const end = new Date(dateString);
 
       if (start > end) {
-        // Jika user pilih akhir lebih awal, tukar
         setRange({
           startDate: dateString,
           endDate: range.startDate,
@@ -125,18 +126,22 @@ const AddMemberScreen = () => {
     }
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
-    const payload: AddMemberForm = {
-      ...form,
-      branchIds: [form.branchId],
-      email: form.email?.trim() === "" ? undefined : form.email,
+    const payload: AddSubscriptionPayload = {
+      member: {
+        name: form.name,
+        phone: form.phone,
+        email: form.email?.trim() === "" ? undefined : form.email,
+      },
+      branchIds: form.branchIds,
       activeSince: range.startDate
         ? new Date(range.startDate).toISOString()
         : "",
       activeUntil: range.endDate ? new Date(range.endDate).toISOString() : "",
     };
 
-    const result = MemberSchema.safeParse(payload);
+    const result = AddSubscriptionPayloadSchema.safeParse(payload);
 
     if (!result.success) {
       const firstError = Object.values(
@@ -150,29 +155,7 @@ const AddMemberScreen = () => {
       setLoading(true);
       const token = await getToken({ template: "user_email_role" });
 
-      const res = await fetch(`${API_BASE_URL}/subscription`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          member: {
-            name: form.name,
-            phone: form.phone,
-            email: payload.email,
-          },
-          branchIds: payload.branchIds,
-          activeSince: payload.activeSince,
-          activeUntil: payload.activeUntil,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.message || "Gagal menambahkan member baru.");
-      }
+      await createSubscription(payload, token);
 
       useMemberStore.getState().setShouldRefetch(true);
 
@@ -233,44 +216,55 @@ const AddMemberScreen = () => {
           />
         </View>
 
-        {/* Branch Picker (single select) */}
+        {/* Multi-Select Branch */}
         <View className="bg-white/10 rounded-xl px-4 py-3">
-          <Text className="text-white font-rubik-medium mb-1">Cabang</Text>
-
+          <Text className="text-white font-rubik-medium mb-1">
+            Pilih Cabang
+          </Text>
           {loadingBranches ? (
-            <Skeleton height={50} width={"100%"} colorMode="dark" radius={12} />
-          ) : (
-            <View className="bg-white/10 rounded-2xl p-2">
-              <RNPickerSelect
-                placeholder={{
-                  label: "Pilih cabang",
-                  value: "",
-                  color: "#ccc",
-                }}
-                onValueChange={(value) => handleChange("branchId", value)}
-                items={branches.map((b) => ({ label: b.name, value: b.id }))}
-                value={form.branchId}
-                useNativeAndroidPickerStyle={false}
-                style={{
-                  inputIOS: {
-                    color: "white",
-                    fontStyle: "italic",
-                  },
-                  inputAndroid: {
-                    color: "white",
-                    fontStyle: "italic",
-                  },
-                  placeholder: {
-                    color: "#ccc",
-                    fontStyle: "italic",
-                  },
-                }}
+            <View className="gap-2">
+              <Skeleton
+                height={40}
+                width={"100%"}
+                radius={10}
+                colorMode="dark"
+              />
+              <Skeleton
+                height={40}
+                width={"100%"}
+                radius={10}
+                colorMode="dark"
               />
             </View>
+          ) : (
+            branches.map((branch) => {
+              const isSelected = form.branchIds.includes(branch.id);
+              return (
+                <Pressable
+                  key={branch.id}
+                  onPress={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      branchIds: isSelected
+                        ? prev.branchIds.filter((id) => id !== branch.id)
+                        : [...prev.branchIds, branch.id],
+                    }))
+                  }
+                  className={`flex-row items-center justify-between px-4 py-3 rounded-xl mb-2 ${
+                    isSelected ? "bg-blue-500/30" : "bg-white/10"
+                  }`}
+                >
+                  <Text className="text-white">{branch.name}</Text>
+                  {isSelected && (
+                    <Feather name="check" size={18} color="white" />
+                  )}
+                </Pressable>
+              );
+            })
           )}
         </View>
 
-        {/* Rentang Tanggal Input (Simulasi) */}
+        {/* Rentang Tanggal Input */}
         <View className="bg-white/10 rounded-xl px-4 py-3">
           <Text className="text-white font-rubik-medium mb-1">
             Rentang Tanggal
@@ -281,34 +275,30 @@ const AddMemberScreen = () => {
           >
             <Text className="text-white italic">
               {range.startDate && range.endDate
-                ? `${new Date(
-                    range.startDate
-                  ).toLocaleDateString()} - ${new Date(
+                ? `${formatIndoDate(range.startDate)} - ${formatIndoDate(
                     range.endDate
-                  ).toLocaleDateString()}`
+                  )}`
                 : "Pilih rentang tanggal"}
             </Text>
           </Pressable>
         </View>
 
-        {/* Modal untuk Calendar */}
+        {/* Modal Calendar */}
         <Modal
           isVisible={showCalendar}
           onBackdropPress={() => setShowCalendar(false)}
-          onBackButtonPress={() => setShowCalendar(false)} // Android back button
+          onBackButtonPress={() => setShowCalendar(false)}
           style={{ justifyContent: "center", alignItems: "center" }}
         >
           <View className="bg-white rounded-xl p-4 w-[90%] max-h-[80%]">
             <Text className="text-black font-rubik-medium text-xl mb-4">
               Pilih Rentang Tanggal
             </Text>
-
             <Calendar
               markingType="period"
               markedDates={range.markedDates}
               onDayPress={onDayPress}
             />
-
             <Pressable
               onPress={() => setShowCalendar(false)}
               className="mt-4 bg-blue-500 py-3 px-6 rounded-full items-center"
@@ -319,7 +309,7 @@ const AddMemberScreen = () => {
         </Modal>
       </View>
 
-      {/* Submit Button */}
+      {/* Submit */}
       <LinearGradient
         colors={["#38bdf8", "#e879f9"]}
         start={{ x: 0, y: 0.5 }}
