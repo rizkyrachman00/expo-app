@@ -113,7 +113,7 @@ const MemberScreen = () => {
     sevenDaysAgo.setHours(0, 0, 0, 0);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const filtered = members.filter((m) => {
+    const filtered = filteredMembersByBranch.filter((m) => {
       const createdAt = m.member.createdAt
         ? new Date(m.member.createdAt)
         : null;
@@ -121,7 +121,7 @@ const MemberScreen = () => {
     });
 
     return filtered.length;
-  }, [members]);
+  }, [filteredMembersByBranch]);
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -372,7 +372,7 @@ const MemberScreen = () => {
                 <View className="bg-white/10 rounded-full px-4 py-2 flex-row items-center gap-2">
                   <AntDesign name="team" size={14} color="#fff" />
                   <Text className="text-white font-rubik text-sm">
-                    Total: {members.length} Anggota
+                    Total: {filteredMembersByBranch.length} Anggota
                   </Text>
                 </View>
               </View>
@@ -417,14 +417,26 @@ const MemberScreen = () => {
                 className="w-12 h-12 rounded-full bg-white/20"
               />
               {/* Info */}
-              <View>
-                <Text className="text-white text-base font-rubik-bold">
-                  {item.member.name}
-                </Text>
-                <Text className="text-white/80 text-sm font-rubik">
-                  {item.member.phone}
-                </Text>
+              <View className="flex-1">
+                {/* Nama */}
+                <View className="flex-row items-center gap-2">
+                  <AntDesign name="user" size={16} color="#fff" />
+                  <Text className="text-white text-base font-rubik-bold">
+                    {item.member.name}
+                  </Text>
+                </View>
+
+                {/* Phone */}
+                <View className="flex-row items-center gap-2 mt-1">
+                  <AntDesign name="phone" size={14} color="#ccc" />
+                  <Text className="text-white/80 text-sm font-rubik">
+                    {item.member.phone}
+                  </Text>
+                </View>
               </View>
+
+              {/* Icon navigasi */}
+              <AntDesign name="right" size={16} color="#999" />
             </Pressable>
           )}
           ListFooterComponent={<View className="h-10" />}
