@@ -1,6 +1,6 @@
 import { AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -20,7 +20,7 @@ import { carouselImages } from "@/constants/data/carousel.image";
 import { useMemberStore } from "@/stores/member.store";
 import { getBranchLabel, getGradientColors } from "@/utils/branch.helper";
 import { useAuth } from "@clerk/clerk-expo";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Skeleton } from "moti/skeleton";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -34,11 +34,19 @@ const MemberScreen = () => {
     setBranches,
     shouldRefetch,
     setShouldRefetch,
+    selectedBranchId,
+    setSelectedBranchId,
   } = useMemberStore();
 
-  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [loading, setLoading] = useState(members.length === 0);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // reset selected branch saat masuk ke screen
+  useFocusEffect(
+    useCallback(() => {
+      setSelectedBranchId(null);
+    }, [])
+  );
 
   // fetch members data
   useEffect(() => {

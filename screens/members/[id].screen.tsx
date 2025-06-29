@@ -4,8 +4,8 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -25,11 +25,21 @@ import { getBranchLabel } from "@/utils/branch.helper";
 import { formatIndoDate } from "@/utils/dateHelpers";
 import { useAuth } from "@clerk/clerk-expo";
 
+import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+
 const MemberDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { members, shouldRefetch, setShouldRefetch, setMembers } =
-    useMemberStore();
+  const {
+    members,
+    shouldRefetch,
+    setShouldRefetch,
+    setMembers,
+    selectedBranchId,
+    setSelectedBranchId,
+  } = useMemberStore();
+
   const router = useRouter();
+  const navigation = useNavigation();
   const { getToken } = useAuth();
 
   const member = useMemo(() => {
@@ -38,6 +48,22 @@ const MemberDetailScreen = () => {
 
   // state untuk loading check-in
   const [isLoading, setIsLoading] = useState(false);
+
+  // state untuk bottom sheet
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [availableBranches, setAvailableBranches] = useState<
+    { name: string; identifier: string }[]
+  >([]);
+
+  // reset selected branch ID saat keluar dari screen
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", () => {
+      // Reset selected branch ID saat keluar dari detail
+      setSelectedBranchId(null);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   // refetch data member jika ada perubahan
   useEffect(() => {
@@ -66,22 +92,78 @@ const MemberDetailScreen = () => {
     }
 
     const memberId = member.member.id;
-    const subscription = member.subscriptions?.[0];
-    const branchId = subscription?.branches?.[0]?.id;
 
-    if (!subscription?.membershipCard?.id || !branchId) {
+    if (!selectedBranchId) {
+      const branches = member.subscriptions.flatMap((sub) =>
+        sub.branches.map((b) => ({
+          identifier: b.identifier,
+          name: b.name,
+        }))
+      );
+
+      const uniqueBranches = Array.from(
+        new Map(branches.map((b) => [b.identifier, b])).values()
+      );
+
+      setAvailableBranches(uniqueBranches);
+
+      if (uniqueBranches.length === 0) {
+        Alert.alert(
+          "Tidak Ada Akses",
+          "Member ini tidak memiliki akses ke cabang manapun."
+        );
+        return;
+      }
+
+      bottomSheetRef.current?.snapToIndex(1);
+
+      return;
+    }
+
+    const matchedSubscription = member.subscriptions.find((sub) =>
+      sub.branches.some((b) => b.identifier === selectedBranchId)
+    );
+
+    console.log("Selected:", selectedBranchId);
+    console.log(
+      "Subscription branch identifiers:",
+      matchedSubscription?.branches.map((b) => b.identifier)
+    );
+
+    if (!matchedSubscription) {
       Alert.alert(
-        "Tidak dapat check-in",
-        "Member belum memiliki kartu atau tidak memiliki akses ke cabang terkait."
+        "Akses Ditolak",
+        `Member tidak memiliki akses ke cabang "${selectedBranchId}".`
       );
       return;
     }
+
+    const matchedBranch = matchedSubscription.branches.find(
+      (b) => b.identifier === selectedBranchId
+    );
+
+    if (!matchedBranch || !matchedSubscription.membershipCard?.id) {
+      Alert.alert(
+        "Tidak dapat check-in",
+        "Data kartu atau cabang tidak valid."
+      );
+      return;
+    }
+
+    const branchId = matchedBranch.id;
 
     try {
       setIsLoading(true);
       const token = await getToken({ template: "user_email_role" });
 
       const res = await checkIn({ type: "member", memberId, branchId }, token);
+
+      // Jika tidak ada cabang untuk ditampilkan, tutup drawer sepenuhnya
+      if (availableBranches.length === 0) {
+        bottomSheetRef.current?.close();
+      } else {
+        bottomSheetRef.current?.snapToIndex(0);
+      }
 
       Alert.alert("Sukses", res.message);
     } catch (error: any) {
@@ -283,6 +365,83 @@ const MemberDetailScreen = () => {
 
         <View className="h-10" />
       </ScrollView>
+
+      {/* Drawer Branch Selection */}
+      <BottomSheet
+        ref={bottomSheetRef}
+        snapPoints={["10%", "20%", "40%", "70%"]}
+        index={-1}
+        enablePanDownToClose={false}
+        enableDynamicSizing={false}
+        backgroundStyle={{
+          backgroundColor: "#ffff",
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+        }}
+      >
+        <View className="p-4 flex-1 bg-primary">
+          <Text className="text-white font-rubik-bold text-base mb-4 text-center">
+            Pilih Cabang Akses
+          </Text>
+
+          <BottomSheetFlatList
+            data={availableBranches}
+            keyExtractor={(item) => item.identifier}
+            ItemSeparatorComponent={() => <View className="h-px bg-white/10" />}
+            ListFooterComponent={
+              selectedBranchId ? (
+                <View className="mt-9 mx-4 mb-6 overflow-hidden rounded-xl">
+                  <Pressable
+                    disabled={isLoading}
+                    onPress={handleCheckIn}
+                    android_ripple={{ color: "#065f46" }}
+                  >
+                    {({ pressed }) => (
+                      <View
+                        className={`flex-row items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 ${
+                          pressed || isLoading ? "opacity-80" : "opacity-100"
+                        }`}
+                      >
+                        {isLoading ? (
+                          <ActivityIndicator color="white" size="small" />
+                        ) : (
+                          <Text className="text-white text-center font-semibold">
+                            Lanjutkan Check-In
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  </Pressable>
+                </View>
+              ) : null
+            }
+            renderItem={({ item }) => {
+              const isSelected = selectedBranchId === item.identifier;
+
+              return (
+                <Pressable
+                  onPress={() => {
+                    setSelectedBranchId(item.identifier);
+                  }}
+                  android_ripple={{ color: "#334155" }}
+                  className="flex-row items-center justify-between px-4 py-3"
+                >
+                  <View className="flex-row items-center gap-3">
+                    <Feather name="map-pin" size={18} color="white" />
+                    <Text className="text-white font-rubik text-base">
+                      {item.name}
+                    </Text>
+                  </View>
+
+                  {isSelected && (
+                    <Feather name="check" size={18} color="#10b981" />
+                  )}
+                </Pressable>
+              );
+            }}
+          />
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 };

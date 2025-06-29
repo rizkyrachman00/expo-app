@@ -7,6 +7,9 @@ interface MemberState {
   branches: Branch[];
   shouldRefetch: boolean;
 
+  selectedBranchId: string | null;
+  setSelectedBranchId: (id: string | null) => void;
+
   setMembers: (members: MemberWithSubscriptions[]) => void;
   setBranches: (branches: Branch[]) => void;
   setShouldRefetch: (val: boolean) => void;
@@ -17,6 +20,9 @@ export const useMemberStore = create<MemberState>((set) => ({
   members: [],
   branches: [],
   shouldRefetch: false,
+
+  selectedBranchId: null, // default: tidak ada filter cabang
+  setSelectedBranchId: (id) => set({ selectedBranchId: id }), // setter
 
   setMembers: (members) => set({ members }),
   setBranches: (branches) => set({ branches }),
