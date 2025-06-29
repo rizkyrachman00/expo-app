@@ -1,12 +1,13 @@
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useVisitorCount } from "@/hooks/useVisitorCount";
+import { type BranchIdentifier, type Location } from "@/types/location";
 import {
-  getStatusFromPercentage,
   getColorsFromStatus,
+  getStatusFromPercentage,
   getTitle,
 } from "@/utils/visitorStatus";
+import { LinearGradient } from "expo-linear-gradient";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { StatusIndicator } from "./status.indicator";
-import { type BranchIdentifier, type Location } from "@/types/location";
 
 type Props = {
   location: Location;
@@ -18,7 +19,7 @@ export const VisitorCounter = ({ location, onPressCheckJamSepi }: Props) => {
 
   const { data, isLoading, refetch, isFetching } =
     useVisitorCount(branchIdentifier);
-    
+
   const count = data ?? 0;
   const percentage = (count / capacity) * 100;
   const status = getStatusFromPercentage(percentage);
@@ -29,8 +30,12 @@ export const VisitorCounter = ({ location, onPressCheckJamSepi }: Props) => {
     <View className="bg-gray-900 rounded-lg p-4 mt-4">
       <View className="flex-row justify-between">
         <View className="flex-1">
-          <Text className="text-white font-rubik-bold text-xl">Blackbox {name}</Text>
-          <Text className="text-white text-sm mt-2">Total pengunjung saat ini:</Text>
+          <Text className="text-white font-rubik-bold text-xl">
+            Blackbox {name}
+          </Text>
+          <Text className="text-white text-sm mt-2">
+            Total pengunjung saat ini:
+          </Text>
           <View className="flex-row items-end">
             <Text className="text-7xl font-rubik-bold text-white">
               {isLoading ? "..." : count}
@@ -45,11 +50,14 @@ export const VisitorCounter = ({ location, onPressCheckJamSepi }: Props) => {
 
       {/* Bar horizontal */}
       <View className="h-2 bg-slate-600 rounded-full mt-4 overflow-hidden">
-        <View
-          className="h-2 rounded-full"
+        <LinearGradient
+          colors={colors}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
           style={{
             width: `${Math.max(percentage, 3)}%`,
-            backgroundColor: colors[0],
+            height: 8,
+            borderRadius: 999,
           }}
         />
       </View>

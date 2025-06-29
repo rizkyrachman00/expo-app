@@ -1,11 +1,10 @@
+import { LabelStatusIndicator } from "@/components/check-situasi/label.status.indicator";
 import { VisitorCounter } from "@/components/check-situasi/visitor.counter";
+import { GymLocations } from "@/constants/data/gym.locations";
 import Entypo from "@expo/vector-icons/Entypo";
-import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { GymLocations } from "@/constants/data/gym.locations";
-import { LabelStatusIndicator } from "@/components/check-situasi/label.status.indicator";
 
 const CheckSituasiScreen = () => {
   return (
