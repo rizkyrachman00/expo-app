@@ -29,7 +29,6 @@ export const getSubscriptions = async (
   return MemberWithSubscriptionsListResponseSchema.parse(json);
 };
 
-
 // Extend Subscription
 export const extendSubscription = async (
   payload: ExtendSubscriptionPayload,
@@ -65,7 +64,6 @@ export const extendSubscription = async (
   }
 };
 
-
 // Create New Subscription
 export const createSubscription = async (
   payload: AddSubscriptionPayload,
@@ -95,5 +93,25 @@ export const createSubscription = async (
 
   if (!response.ok) {
     throw new Error(json?.message || "Gagal menambahkan member baru.");
+  }
+};
+
+// DELETE /subscription/:id (soft delete)
+export const deleteSubscription = async (
+  id: string,
+  token: string | null
+): Promise<void> => {
+  if (!token) throw new Error("Token tidak tersedia");
+
+  const res = await fetch(`${API_BASE_URL}/subscription/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.message || "Gagal nonaktifkan subscription");
   }
 };

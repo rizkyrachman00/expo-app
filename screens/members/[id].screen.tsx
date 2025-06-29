@@ -19,7 +19,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { checkIn } from "@/api/check-in";
-import { getSubscriptions } from "@/api/subscriptions";
+import { deleteSubscription, getSubscriptions } from "@/api/subscriptions";
 import { useMemberStore } from "@/stores/member.store";
 import { getBranchLabel } from "@/utils/branch.helper";
 import { formatIndoDate } from "@/utils/dateHelpers";
@@ -42,6 +42,36 @@ const MemberDetailScreen = () => {
   const navigation = useNavigation();
   const { getToken } = useAuth();
 
+  // state untuk bottom sheet revoke subscription
+  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<
+    string | null
+  >(null);
+  const [isRevoking, setIsRevoking] = useState(false);
+  const revokeSheetRef = useRef<BottomSheet>(null);
+
+  // fungsi untuk revoke subscription
+  const handleRevokeSubscription = async () => {
+    if (!selectedSubscriptionId) return;
+
+    try {
+      setIsRevoking(true);
+      const token = await getToken({ template: "user_email_role" });
+      await deleteSubscription(selectedSubscriptionId, token);
+
+      // Refetch setelah sukses
+      const updated = await getSubscriptions(token);
+      setMembers(updated);
+
+      Alert.alert("Sukses", "Subscription berhasil dinonaktifkan.");
+      revokeSheetRef.current?.close();
+    } catch (err: any) {
+      Alert.alert("Gagal", err.message || "Terjadi kesalahan saat revoke.");
+    } finally {
+      setIsRevoking(false);
+      setSelectedSubscriptionId(null);
+    }
+  };
+
   const member = useMemo(() => {
     return members.find((m) => m.member.id === id);
   }, [id, members]);
@@ -49,7 +79,7 @@ const MemberDetailScreen = () => {
   // state untuk loading check-in
   const [isLoading, setIsLoading] = useState(false);
 
-  // state untuk bottom sheet
+  // state untuk bottom sheet select branch
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [availableBranches, setAvailableBranches] = useState<
     { name: string; identifier: string }[]
@@ -363,17 +393,43 @@ const MemberDetailScreen = () => {
                     </View>
                   </View>
 
-                  {/* Tanggal Aktif */}
-                  <View className="flex-row items-center gap-2">
-                    <MaterialIcons
-                      name="calendar-month"
-                      size={16}
-                      color="#ccc"
-                    />
-                    <Text className="text-white/70 text-sm">
-                      {formatIndoDate(item.subscription.activeSince)} –{" "}
-                      {formatIndoDate(item.subscription.activeUntil)}
-                    </Text>
+                  {/* Tanggal Aktif + Tombol Revoke */}
+                  <View className="flex-row justify-between items-center mt-1">
+                    {/* Tanggal */}
+                    <View className="flex-row items-center gap-2">
+                      <MaterialIcons
+                        name="calendar-month"
+                        size={16}
+                        color="#ccc"
+                      />
+                      <Text className="text-white/70 text-sm font-rubik">
+                        {formatIndoDate(item.subscription.activeSince)} –{" "}
+                        {formatIndoDate(item.subscription.activeUntil)}
+                      </Text>
+                    </View>
+
+                    {/* Tombol Revoke hanya jika aktif */}
+                    {isActive && (
+                      <Pressable
+                        onPress={() => {
+                          setSelectedSubscriptionId(item.subscription.id);
+                          revokeSheetRef.current?.snapToIndex(0);
+                        }}
+                        className="rounded-xl overflow-hidden"
+                      >
+                        {({ pressed }) => (
+                          <View
+                            className={`px-3 py-1 ${
+                              pressed ? "bg-red-700" : "bg-red-600"
+                            } rounded-xl`}
+                          >
+                            <Text className="text-white text-sm font-rubik">
+                              Revoke Subscription
+                            </Text>
+                          </View>
+                        )}
+                      </Pressable>
+                    )}
                   </View>
                 </View>
               );
@@ -458,6 +514,63 @@ const MemberDetailScreen = () => {
               );
             }}
           />
+        </View>
+      </BottomSheet>
+
+      {/* Drawer Konfirmasi Revoke Subscription */}
+      <BottomSheet
+        ref={revokeSheetRef}
+        snapPoints={["20%", "40%"]}
+        index={-1}
+        enablePanDownToClose={true}
+        enableDynamicSizing={false}
+        backgroundStyle={{
+          backgroundColor: "#ffff",
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+        }}
+      >
+        <View className="flex-1 bg-primary p-6 items-center justify-center">
+          {/* Ikon Warning */}
+          <View className="bg-red-100 p-4 rounded-full mb-4">
+            <MaterialIcons name="warning" size={36} color="#dc2626" />
+          </View>
+
+          {/* Judul */}
+          <Text className="text-center text-lg font-rubik-bold text-red-600 mb-2">
+            Yakin ingin menonaktifkan subscription ini?
+          </Text>
+
+          {/* Deskripsi */}
+          <Text className="text-center text-white font-rubik mb-6">
+            Aksi ini tidak bisa dibatalkan. Member tidak akan bisa check-in di
+            cabang terkait.
+          </Text>
+
+          {/* Tombol Aksi */}
+          <View className="flex-row gap-3 w-full">
+            {/* Batal */}
+            <Pressable
+              onPress={() => revokeSheetRef.current?.close()}
+              className="flex-1 rounded-xl border border-gray-300 py-3 justify-center items-center"
+            >
+              <Text className="text-gray-600 font-rubik">Batal</Text>
+            </Pressable>
+
+            {/* Ya, Nonaktifkan */}
+            <Pressable
+              onPress={handleRevokeSubscription}
+              disabled={isRevoking}
+              className="flex-1 rounded-xl bg-red-600 py-3 justify-center items-center"
+              android_ripple={{ color: "#7f1d1d" }}
+            >
+              {isRevoking ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="text-white font-rubik">Ya, Nonaktifkan</Text>
+              )}
+            </Pressable>
+          </View>
         </View>
       </BottomSheet>
     </SafeAreaView>
