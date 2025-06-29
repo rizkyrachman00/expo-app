@@ -120,9 +120,17 @@ const MemberDetailScreen = () => {
       return;
     }
 
-    const matchedSubscription = member.subscriptions.find((sub) =>
-      sub.branches.some((b) => b.identifier === selectedBranchId)
-    );
+    const matchedSubscription = member.subscriptions.find((sub) => {
+      const isStillValid =
+        new Date(sub.subscription.activeUntil) > new Date() &&
+        sub.subscription.deletedAt == null;
+
+      const hasAccessToBranch = sub.branches.some(
+        (b) => b.identifier === selectedBranchId
+      );
+
+      return isStillValid && hasAccessToBranch;
+    });
 
     console.log("Selected:", selectedBranchId);
     console.log(
@@ -131,9 +139,18 @@ const MemberDetailScreen = () => {
     );
 
     if (!matchedSubscription) {
+      const selectedBranch = availableBranches.find(
+        (b) => b.identifier === selectedBranchId
+      );
+
+      const branchLabel = getBranchLabel(
+        selectedBranch?.identifier ?? "",
+        selectedBranch?.name ?? "-"
+      );
+
       Alert.alert(
         "Akses Ditolak",
-        `Member tidak memiliki akses ke cabang "${selectedBranchId}".`
+        `Member tidak memiliki akses ke cabang "${branchLabel}".`
       );
       return;
     }
@@ -310,7 +327,8 @@ const MemberDetailScreen = () => {
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => {
               const isActive =
-                new Date(item.subscription.activeUntil) > new Date();
+                new Date(item.subscription.activeUntil) > new Date() &&
+                item.subscription.deletedAt === null;
 
               return (
                 <View className="mb-4 bg-white/10 rounded-2xl px-4 py-5 shadow-md shadow-black/20">
