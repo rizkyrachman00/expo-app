@@ -5,8 +5,9 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -17,6 +18,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { checkIn } from "@/api/check-in";
 import { getSubscriptions } from "@/api/subscriptions";
 import { useMemberStore } from "@/stores/member.store";
 import { getBranchLabel } from "@/utils/branch.helper";
@@ -33,6 +35,9 @@ const MemberDetailScreen = () => {
   const member = useMemo(() => {
     return members.find((m) => m.member.id === id);
   }, [id, members]);
+
+  // state untuk loading check-in
+  const [isLoading, setIsLoading] = useState(false);
 
   // refetch data member jika ada perubahan
   useEffect(() => {
@@ -52,6 +57,53 @@ const MemberDetailScreen = () => {
       refetchData();
     }
   }, [shouldRefetch]);
+
+  // handle check-in member
+  const handleCheckIn = async () => {
+    if (!member) {
+      Alert.alert("Error", "Data member tidak ditemukan.");
+      return;
+    }
+
+    const memberId = member.member.id;
+    const subscription = member.subscriptions?.[0];
+    const branchId = subscription?.branches?.[0]?.id;
+
+    if (!subscription?.membershipCard?.id || !branchId) {
+      Alert.alert(
+        "Tidak dapat check-in",
+        "Member belum memiliki kartu atau tidak memiliki akses ke cabang terkait."
+      );
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const token = await getToken({ template: "user_email_role" });
+
+      const res = await checkIn({ type: "member", memberId, branchId }, token);
+
+      Alert.alert("Sukses", res.message);
+    } catch (error: any) {
+      if (error.message.includes("tidak memiliki izin")) {
+        Alert.alert(
+          "Tidak Memiliki Izin",
+          "Member tidak memiliki akses ke cabang ini. Lanjutkan check-in sebagai tamu.",
+          [
+            {
+              text: "Isi Form Tamu",
+              onPress: () => router.push("/check-in/guest"),
+            },
+            { text: "Batal", style: "cancel" },
+          ]
+        );
+      } else {
+        Alert.alert("Gagal", error.message || "Terjadi kesalahan.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!member) {
     return (
@@ -84,17 +136,24 @@ const MemberDetailScreen = () => {
           {/* Check In */}
           <View className="flex-1 overflow-hidden rounded-xl">
             <Pressable
-              onPress={() => console.log("TODO: Navigate to check in screen")}
+              disabled={isLoading}
+              onPress={handleCheckIn}
               android_ripple={{ color: "#003f88" }}
             >
               {({ pressed }) => (
                 <View
-                  className={`flex-row items-center justify-center gap-2 px-4 py-3 bg-blue-500 ${
-                    pressed ? "opacity-80" : "opacity-100"
+                  className={`flex-row items-center justify-center gap-2 px-4 py-3 bg-blue-500 rounded-xl ${
+                    pressed || isLoading ? "opacity-80" : "opacity-100"
                   }`}
                 >
-                  <Feather name="log-in" size={18} color="white" />
-                  <Text className="text-white font-rubik">Check In</Text>
+                  {isLoading ? (
+                    <ActivityIndicator color="white" size="small" />
+                  ) : (
+                    <>
+                      <Feather name="log-in" size={18} color="white" />
+                      <Text className="text-white font-rubik">Check In</Text>
+                    </>
+                  )}
                 </View>
               )}
             </Pressable>
