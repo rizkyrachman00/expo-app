@@ -25,6 +25,7 @@ import { getBranchLabel } from "@/utils/branch.helper";
 import { formatIndoDate } from "@/utils/dateHelpers";
 import { useAuth } from "@clerk/clerk-expo";
 
+import MembershipCard from "@/components/member/membership.card";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 
 const MemberDetailScreen = () => {
@@ -342,6 +343,12 @@ const MemberDetailScreen = () => {
             <Text className="ml-2 text-white font-rubik">{email || "-"}</Text>
           </View>
         </View>
+
+        {/* Kartu Member */}
+        <Text className="text-white font-rubik-bold text-lg mb-2">
+          Kartu Member
+        </Text>
+        <MembershipCard member={member} />
 
         {/* Riwayat Subscription */}
         <Text className="text-white font-rubik-bold text-lg mb-2">
