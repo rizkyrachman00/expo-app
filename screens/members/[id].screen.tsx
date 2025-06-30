@@ -333,7 +333,7 @@ const MemberDetailScreen = () => {
         </Text>
 
         {/* Kontak */}
-        <View className="bg-white/10 rounded-2xl p-4 mb-6">
+        <View className="bg-white/10 rounded-2xl p-4 mb-4">
           <View className="flex-row items-center mb-3">
             <AntDesign name="phone" size={16} color="white" />
             <Text className="ml-2 text-white font-rubik">{phone || "-"}</Text>
@@ -351,7 +351,7 @@ const MemberDetailScreen = () => {
         <MembershipCard member={member} />
 
         {/* Riwayat Subscription */}
-        <Text className="text-white font-rubik-bold text-lg mb-2">
+        <Text className="text-white font-rubik-bold text-lg mb-2 mt-4">
           Riwayat Subscription
         </Text>
 

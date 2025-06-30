@@ -145,8 +145,8 @@ const MembershipCard = ({ member }: Props) => {
   // check if there are any active subscriptions
   if (uniqueBranchSubscriptions.length === 0) {
     return (
-      <View className="bg-gray-900 p-4 rounded-md my-4">
-        <Text className="text-white font-rubik-medium">Tidak ada langganan aktif.</Text>
+      <View className="bg-gray-900 p-4 rounded-md mb-2">
+        <Text className="text-white font-rubik-medium">Tidak ada subscription aktif.</Text>
       </View>
     );
   }
@@ -230,7 +230,7 @@ const MembershipCard = ({ member }: Props) => {
             </ViewShot>
 
             {/* Tombol Share & Simpan */}
-            <View className="flex-row justify-center gap-4 my-4">
+            <View className="flex-row justify-center gap-4 mt-4 mb-6">
               <Pressable
                 onPress={() =>
                   handleShare(
