@@ -32,6 +32,11 @@ export const CheckInPayloadSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
+export const GuestQrSchema = z.object({
+  type: z.literal("guest"),
+  branchId: z.string().uuid("ID cabang tidak valid"),
+});
+
 // Response
 export const CheckInResponseSchema = z.object({
   message: z.string(),

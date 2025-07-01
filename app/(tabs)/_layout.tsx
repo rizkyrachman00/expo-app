@@ -148,7 +148,7 @@ const TabsLayout = () => {
 
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={["50%", "70%"]}
+        snapPoints={["70%", "85%"]}
         index={-1}
         enableDynamicSizing={false}
         enablePanDownToClose={true}

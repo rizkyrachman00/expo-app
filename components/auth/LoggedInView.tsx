@@ -1,5 +1,10 @@
 import { UserResource } from "@clerk/types";
-import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  FontAwesome6,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 
@@ -70,7 +75,7 @@ export const LoggedInView = ({
       </View>
 
       <View className="mt-12">
-        <View className="flex-row flex-wrap gap-x-4 gap-y-4">
+        <View className="flex-row flex-wrap gap-4 justify-between">
           <MenuItem
             label="Trainer"
             icon={<Ionicons name="barbell-outline" size={20} color="#FCA311" />}
@@ -84,7 +89,7 @@ export const LoggedInView = ({
                 icon={
                   <Ionicons name="qr-code-outline" size={20} color="#FCA311" />
                 }
-                onPress={() => console.log("Navigate to QR Check-In")}
+                onPress={() => router.push("/checkin-admin/branch.qr")}
               />
               <MenuItem
                 label="Check-In Data"
@@ -100,8 +105,28 @@ export const LoggedInView = ({
               />
             </>
           )}
-          
         </View>
+
+        {admin && (
+          <View className="mt-6 rounded-2xl overflow-hidden bg-yellow-500 shadow-lg shadow-black/50">
+            <Pressable
+              onPress={() => router.push("/checkin-admin")}
+              android_ripple={{ color: "#ffdd00", borderless: false }}
+              className="rounded-2xl"
+            >
+              <View className="flex-row items-center justify-center px-6 py-4 gap-3">
+                <MaterialCommunityIcons
+                  name="qrcode-scan"
+                  size={22}
+                  color="black"
+                />
+                <Text className="text-black text-base font-rubik-bold">
+                  Scan QR Member
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        )}
 
         <View className="my-6 h-px bg-white/20" />
 
