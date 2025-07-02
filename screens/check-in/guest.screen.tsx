@@ -5,6 +5,7 @@ import {
   CheckInResponseSchema,
 } from "@/schemas/check-in.schema";
 import { Branch } from "@/schemas/subscription.schema";
+import { useVisitLogStore } from "@/stores/visit.logs.store";
 import { useAuth } from "@clerk/clerk-expo";
 import { Feather, FontAwesome6 } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -74,6 +75,8 @@ const CheckInGuestScreen = () => {
       if (!parsedResponse.success) {
         throw new Error("Respons tidak valid dari server.");
       }
+
+      useVisitLogStore.getState().setShouldRefetch(true);
 
       Alert.alert("Berhasil", parsedResponse.data.message, [
         { text: "OK", onPress: () => router.replace("/") },

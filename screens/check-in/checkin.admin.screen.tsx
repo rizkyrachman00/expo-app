@@ -1,3 +1,4 @@
+import { useVisitLogStore } from "@/stores/visit.logs.store";
 import { useAuth } from "@clerk/clerk-expo";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
@@ -58,6 +59,7 @@ const CheckinAdminScreen = () => {
       await checkIn(parsed, token);
 
       Alert.alert("Berhasil", "Check-in berhasil dilakukan");
+      useVisitLogStore.getState().setShouldRefetch(true);
       router.back();
     } catch (err: any) {
       Alert.alert("Gagal", "QR tidak valid");

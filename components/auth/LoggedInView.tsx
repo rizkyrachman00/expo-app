@@ -1,6 +1,5 @@
 import { UserResource } from "@clerk/types";
 import {
-  FontAwesome6,
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -94,9 +93,13 @@ export const LoggedInView = ({
               <MenuItem
                 label="Check-In Data"
                 icon={
-                  <FontAwesome6 name="list-check" size={20} color="#FCA311" />
+                  <MaterialCommunityIcons
+                    name="history"
+                    size={20}
+                    color="#FCA311"
+                  />
                 }
-                onPress={() => console.log("Navigate to Check-In Data")}
+                onPress={() => router.push("/checkin-admin/visit.logs")}
               />
               <MenuItem
                 label="Members"
