@@ -11,6 +11,9 @@ export const CheckInPayloadSchema = z.discriminatedUnion("type", [
     branchId: z
       .string({ required_error: "Cabang wajib diisi" })
       .uuid("ID cabang tidak valid"),
+    subscriptionId: z
+      .string({ required_error: "ID subscription wajib diisi" })
+      .uuid("ID subscription tidak valid"),
   }),
 
   // GUEST

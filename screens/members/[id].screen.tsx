@@ -199,12 +199,16 @@ const MemberDetailScreen = () => {
     }
 
     const branchId = matchedBranch.id;
+    const subscriptionId = matchedSubscription.subscription.id;
 
     try {
       setIsLoading(true);
       const token = await getToken({ template: "user_email_role" });
 
-      const res = await checkIn({ type: "member", memberId, branchId }, token);
+      const res = await checkIn(
+        { type: "member", memberId, branchId, subscriptionId },
+        token
+      );
 
       // Jika tidak ada cabang untuk ditampilkan, tutup drawer sepenuhnya
       if (availableBranches.length === 0) {
