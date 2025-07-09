@@ -160,6 +160,7 @@ const MembershipCard = ({ member }: Props) => {
           type: "member" as const,
           memberId: member.member.id,
           branchId: branch.id,
+          subscriptionId: sub.subscription.id,
         };
         const activeUntilDate = new Date(sub.subscription.activeUntil);
         const formattedDate = formatIndoDate(activeUntilDate);
